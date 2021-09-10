@@ -3,7 +3,7 @@ import alanp
 
 class LineTokenParser(alanp.TokenParser):
     def parse(self, text: str) -> alanp.Token:
-        return alanp.Token(text.split("\n")[0] + "\n")
+        return (alanp.Token(text.split("\n")[0] + "\n"), self)
 
 
 def test_line_token_parser():
