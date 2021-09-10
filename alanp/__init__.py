@@ -8,6 +8,10 @@ class Token:
     text: str
 
 
+class EofToken(Token):
+    pass
+
+
 @dataclasses.dataclass
 class ParsedToken:
     pos: int
@@ -25,3 +29,4 @@ def parse_tokens(text: str, token_parser: TokenParser, pos: int = 0):
         (token, token_parser) = token_parser.parse(text[pos:])
         yield ParsedToken(pos, token)
         pos += len(token.text)
+    yield ParsedToken(pos, EofToken(""))

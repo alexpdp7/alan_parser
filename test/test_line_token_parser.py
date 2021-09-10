@@ -20,4 +20,5 @@ test
         alanp.ParsedToken(pos=5, token=alanp.Token(text="is\n")),
         alanp.ParsedToken(pos=8, token=alanp.Token(text="a\n")),
         alanp.ParsedToken(pos=10, token=alanp.Token(text="test\n")),
+        alanp.ParsedToken(pos=15, token=alanp.EofToken(text="")),
     ]
