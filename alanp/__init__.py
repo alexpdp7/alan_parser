@@ -24,9 +24,33 @@ class TokenParser(abc.ABC):
         pass
 
 
-def parse_tokens(text: str, token_parser: TokenParser, pos: int = 0):
-    while pos < len(text):
-        (token, token_parser) = token_parser.parse(text[pos:])
-        yield ParsedToken(pos, token)
-        pos += len(token.text)
-    yield ParsedToken(pos, EofToken(""))
+@dataclasses.dataclass
+class ParseTokenState:
+    token_parser: TokenParser
+    text: str
+    pos: int = 0
+
+    def parse(self) -> typing.Tuple[ParsedToken, typing.Optional["ParseTokenState"]]:
+        assert self.pos <= len(self.text)
+        if self.pos == len(self.text):
+            return (ParsedToken(self.pos, EofToken("")), None)
+        (token, next_token_parser) = self.token_parser.parse(self.text[self.pos :])
+        parsed_token = ParsedToken(self.pos, token)
+        new_parse_token_state = ParseTokenState(
+            next_token_parser, self.text, self.pos + len(token.text)
+        )
+        return (parsed_token, new_parse_token_state)
+
+
+def tokenize(
+    text: str, initial_token_parser: TokenParser
+) -> typing.Generator[ParsedToken, None, None]:
+    parse_token_state: typing.Optional[ParseTokenState] = ParseTokenState(
+        initial_token_parser, text, 0
+    )
+    while True:
+        assert parse_token_state
+        (parsed_token, parse_token_state) = parse_token_state.parse()
+        yield parsed_token
+        if isinstance(parsed_token.token, EofToken):
+            return
