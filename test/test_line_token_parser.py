@@ -7,7 +7,7 @@ class LineTokenParser(alanp.TokenParser):
 
 
 def test_line_token_parser():
-    parsed = alanp.parse_tokens(
+    parsed = alanp.tokenize(
         """This
 is
 a
