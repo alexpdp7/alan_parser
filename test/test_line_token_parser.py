@@ -1,12 +1,14 @@
+import typing
+
 import alanp
 
 
 class LineTokenParser(alanp.TokenParser):
-    def parse(self, text: str) -> alanp.Token:
+    def parse(self, text: str) -> typing.Tuple[alanp.Token, alanp.TokenParser]:
         return (alanp.Token(text.split("\n")[0] + "\n"), self)
 
 
-def test_line_token_parser():
+def test_line_token_parser() -> None:
     parsed = alanp.tokenize(
         """This
 is

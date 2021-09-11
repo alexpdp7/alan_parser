@@ -20,7 +20,7 @@ class ParsedToken:
 
 class TokenParser(abc.ABC):
     @abc.abstractmethod
-    def parse(self, text) -> typing.Tuple[Token, "TokenParser"]:
+    def parse(self, text: str) -> typing.Tuple[Token, "TokenParser"]:
         pass
 
 

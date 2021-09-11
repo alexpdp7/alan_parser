@@ -19,9 +19,10 @@ class NewLineToken(alanp.Token):
 
 
 class ZeroParser(alanp.TokenParser):
-    def parse(self, text: str):
+    def parse(self, text: str) -> typing.Tuple[alanp.Token, alanp.TokenParser]:
         if text.startswith("="):
             match = re.match("=+ ", text)
+            assert match
             return (HeaderToken(match.group()), TextLineParser())
         if text.startswith("\n"):
             return (NewLineToken("\n"), ZeroParser())
@@ -29,34 +30,44 @@ class ZeroParser(alanp.TokenParser):
 
 
 class TextLineParser(alanp.TokenParser):
-    def parse(self, text: str):
+    def parse(self, text: str) -> typing.Tuple[alanp.Token, alanp.TokenParser]:
         line = text.split("\n")[0]
         return (TextToken(line), ZeroParser())
 
 
+class Block:
+    pass
+
+
 @dataclasses.dataclass
-class HeaderBlock:
+class HeaderBlock(Block):
     header_token: alanp.ParsedToken
     text_token: alanp.ParsedToken
 
 
 @dataclasses.dataclass
-class ParagraphBlock:
+class ParagraphBlock(Block):
     tokens: typing.List[alanp.ParsedToken]
 
 
-def make_blocks(text):
-    parse_token_state = alanp.ParseTokenState(ZeroParser(), text, 0)
+def make_blocks(text: str) -> typing.Generator[Block, None, None]:
+    parse_token_state: typing.Optional[alanp.ParseTokenState] = alanp.ParseTokenState(
+        ZeroParser(), text, 0
+    )
     while True:
+        assert parse_token_state
         (parsed_token, parse_token_state) = parse_token_state.parse()
 
         if isinstance(parsed_token.token, NewLineToken):
             continue
 
+        assert parse_token_state
+
         if isinstance(parsed_token.token, HeaderToken):
             header_token = parsed_token
             (parsed_token, parse_token_state) = parse_token_state.parse()
             assert isinstance(parsed_token.token, TextToken)
+            assert parse_token_state
             text_token = parsed_token
             (parsed_token, parse_token_state) = parse_token_state.parse()
             assert isinstance(parsed_token.token, NewLineToken) or isinstance(
@@ -68,6 +79,7 @@ def make_blocks(text):
         if isinstance(parsed_token.token, TextToken):
             paragraph = [parsed_token]
             while True:
+                assert parse_token_state
                 (parsed_token, parse_token_state) = parse_token_state.parse()
                 if isinstance(parsed_token.token, NewLineToken) or isinstance(
                     parsed_token.token, TextToken
@@ -84,7 +96,7 @@ def make_blocks(text):
                     break
 
 
-def _adoc(adoc):
+def _adoc(adoc: str) -> str:
     return textwrap.dedent(adoc)
 
 
@@ -97,7 +109,7 @@ Bar
 )
 
 
-def test_tokenize_simple():
+def test_tokenize_simple() -> None:
     tokens = list(
         alanp.tokenize(
             simple,
@@ -115,7 +127,7 @@ def test_tokenize_simple():
     ]
 
 
-def test_make_blocks_simple():
+def test_make_blocks_simple() -> None:
     blocks = list(make_blocks(simple))
     assert blocks == [
         HeaderBlock(
