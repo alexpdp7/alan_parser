@@ -24,4 +24,4 @@ jobs:
         poetry run python -m pytest
     - name: Check with mypy
       run: |
-        poetry run mypy -p alanp
+        poetry run mypy .
