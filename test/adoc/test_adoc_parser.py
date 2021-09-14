@@ -49,3 +49,46 @@ def test_make_blocks_simple() -> None:
             ]
         ),
     ]
+
+
+ifdef = _adoc(
+    """\
+ifndef::att1,att2[whatever]
+"""
+)
+
+
+def test_tokenize_ifdef() -> None:
+    tokens = list(
+        alanp.tokenize(
+            ifdef,
+            adoc.ZeroParser(),
+        )
+    )
+    assert tokens == [
+        alanp.ParsedToken(pos=0, token=adoc.ConditionalDirectiveToken(text="ifndef::")),
+        alanp.ParsedToken(pos=8, token=adoc.AttributeToken(text="att1")),
+        alanp.ParsedToken(pos=12, token=adoc.CommaToken(text=",")),
+        alanp.ParsedToken(pos=13, token=adoc.AttributeToken(text="att2")),
+        alanp.ParsedToken(pos=17, token=adoc.ConditionalDirectiveStartToken(text="[")),
+        alanp.ParsedToken(pos=18, token=adoc.TextToken(text="whatever")),
+        alanp.ParsedToken(pos=26, token=adoc.ConditionalDirectiveEndToken(text="]\n")),
+        alanp.ParsedToken(pos=28, token=alanp.EofToken(text="")),
+    ]
+
+
+def test_make_blocks_ifdef() -> None:
+    blocks = list(adoc.make_blocks(ifdef))
+    assert blocks == [
+        adoc.ParagraphBlock(
+            tokens=[alanp.ParsedToken(pos=18, token=adoc.TextToken(text="whatever"))],
+            condition=[
+                alanp.ParsedToken(
+                    pos=0, token=adoc.ConditionalDirectiveToken(text="ifndef::")
+                ),
+                alanp.ParsedToken(pos=8, token=adoc.AttributeToken(text="att1")),
+                alanp.ParsedToken(pos=12, token=adoc.CommaToken(text=",")),
+                alanp.ParsedToken(pos=13, token=adoc.AttributeToken(text="att2")),
+            ],
+        )
+    ]
