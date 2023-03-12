@@ -1,4 +1,7 @@
-`lmparser` is an experiment in parsing.
+`lmparser` was an experiment in parsing.
+
+Archived, because currently I think Prolog is the best option to write parsers for lightweight markup languages.
+See this [AsciiDoc Prolog parser](https://github.com/alexpdp7/prolog-asciidoc).
 
 # The problem
 
